@@ -140,8 +140,35 @@ def im2col(images, kernel_h, kernel_w, stride, padding):
         C * kernel_h *kernel_w
     )
 
-# Step 16 - col2im (not yet solved)
-# TODO: implement
+# Step 16 - col2im
+def col2im(cols, input_shape, kernel_h, kernel_w, stride, padding):
+    # TODO: re-roll a (N*out_h*out_w, C*kh*kw) column matrix back into a (N, C, H, W) tensor
+    N,C,H,W = input_shape
+
+    out_h = output_spatial_size(H, kernel_h, stride, padding)
+    out_w = output_spatial_size(W, kernel_w, stride, padding)
+
+    patches = cols.reshape(
+        N, out_h, out_w, C, kernel_h, kernel_w
+    ).transpose(0,3,4,5,1,2)
+
+    x_pad = np.zeros(
+        (N,C,H +2 *padding, W +2*padding),
+        dtype = cols.dtype
+    )
+
+    for i in range(kernel_h):
+        for j in range(kernel_w):
+
+            x_pad[
+                :,:,i:i +stride *out_h:stride,
+                j:j +stride * out_w: stride
+            ] += patches[:,:,i,j]
+
+    if padding > 0:
+        return x_pad[:,:, padding:-padding, padding:-padding]
+
+    return x_pad
 
 # Step 17 - conv2d_forward (not yet solved)
 # TODO: implement
