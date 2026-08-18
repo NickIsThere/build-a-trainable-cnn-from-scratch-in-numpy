@@ -113,8 +113,32 @@ def output_spatial_size(input_size, kernel, stride, padding):
     
     return int(np.floor(np.divide(input_size + 2*padding - kernel, stride)) +1)
 
-# Step 15 - im2col (not yet solved)
-# TODO: implement
+# Step 15 - im2col
+def im2col(images, kernel_h, kernel_w, stride, padding):
+    # TODO: Unroll overlapping patches of a 4D image tensor into a 2D column matrix.
+    N,C, H, W = images.shape
+
+    padded = np.pad(
+        images, 
+        ((0,0), (0,0), (padding, padding), (padding, padding)),
+        mode ="constant"
+    )
+
+    windows = np.lib.stride_tricks.sliding_window_view(
+        padded, (kernel_h, kernel_w), axis = (2,3)
+    )
+
+    windows = windows[:,:,::stride, ::stride, :, :]
+
+    out_h = windows.shape[2]
+    out_w = windows.shape[3]
+
+    cols = windows.transpose(0,2,3,1,4,5)
+
+    return cols.reshape(
+        N* out_h *out_w,
+        C * kernel_h *kernel_w
+    )
 
 # Step 16 - col2im (not yet solved)
 # TODO: implement
